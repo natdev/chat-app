@@ -1,0 +1,31 @@
+.current-user {
+    justify-content: flex-end;
+}
+
+.current-user .message {
+    max-width: 480px;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-right: 5px;
+    background: #205a73;
+    border-radius: 5px;
+    color: #fff;
+    overflow-wrap: break-word;
+}
+
+.other-user {
+    justify-content: flex-start;
+}
+
+.other-user .message {
+    max-width: 480px;
+    padding: 10px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: 5px;
+    background: #e1e1e1;
+    border-radius: 5px;
+    color: #000;
+    overflow-wrap: break-word;
+}

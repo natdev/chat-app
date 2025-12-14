@@ -1,0 +1,18 @@
+<div class="user-item flex items-center" [class]="{ 
+  'selected' : user?.id === selectedUser?.id && user?.id !== currentUser?.id,
+  'default' : user?.id === currentUser?.id || !user.isOnline,
+  'cursor-pointer' : user?.id !== currentUser?.id,
+  'other-user-item' : user?.id !== currentUser?.id && user.isOnline,
+}">
+  <div class="avatar pl-5 pr-5 flex justify-center">
+    <div class="badge-user">
+      <p-overlaybadge [severity]="user.isOnline ? 'success' : 'danger'">
+      <p-avatar  label="N" size="large" shape="circle" />
+    </p-overlaybadge>
+    </div>
+  </div>
+  <div>
+    <div class="username font-bold text-lg">{{ user?.username }}</div>
+    <div class="last-message text-sm text-gray-500">Last message preview...</div>
+  </div>
+</div>

@@ -1,0 +1,18 @@
+@import "tailwindcss";
+@import "primeicons/primeicons.css";
+@import 'ckeditor5/ckeditor5.css';
+
+html, body {
+      height: 100%;
+      margin: 0;
+    }
+
+.badge-user .p-overlaybadge .p-badge {
+  top: auto !important;
+  bottom: 0 !important;
+  right: 10% !important;
+}
+
+.send-rotate{
+  rotate: 45deg;
+}

@@ -1,0 +1,17 @@
+.user-item{
+  width: 100%;
+  height: 100%;
+  border-bottom: 1px solid #ddd;
+}
+
+.default{
+  pointer-events: none;
+}
+
+.other-user-item:hover {
+  box-shadow: inset -2px 0px 14px 5px #000;
+}
+
+.selected {
+  box-shadow: inset -2px 0px 14px 5px #000;
+}

@@ -1,0 +1,4 @@
+<div class="flex" [ngClass]="{'other-user': !message.fromSelf, 'current-user': true}">
+  <div class="message" [innerHTML]="message.message"></div>
+</div>
+

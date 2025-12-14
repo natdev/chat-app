@@ -1,0 +1,82 @@
+<div class="grid grid-cols-12 grid-rows-auto h-full">
+  <div class="flex justify-end p-2 bg-black col-start-1 col-end-13 row-start-[0] row-end-[1]">
+    <span (click)="onDisconnect()" class="text-white cursor-pointer">log out</span>
+  </div>
+  <div class="user-list-container
+grid auto-rows-[130px]
+row-start-[1]
+row-end-[-1] 
+col-start-[1] 
+col-end-[4]">
+@for (user of users; track $index) {
+  <div class="chat-item-wrapper">
+    <app-chat-user-item [user]="user" [selectedUser]="selectedUser" [currentUser]="currentUser" (click)="selectUser(user)"></app-chat-user-item> 
+  </div>
+}
+  
+</div>
+
+<div class="chat-container grid grid-cols-3 
+row-start-[1]
+row-end-[-1] 
+col-start-[4] 
+col-end-[-1]"
+[class]="{
+  'grid-rows-[80px_495px_1fr]' : selectedUser?.id,
+  'grid-rows-[557px_1fr]' : !selectedUser?.id
+}"
+>
+@if(selectedUser?.id ) {
+    <div class="chat-header
+    grid grid-cols-[1fr_100px] 
+    col-start-[1] 
+    col-end-[-1]">
+      <div class="p-5 font-bold text-2xl">
+        <p-avatar  label="{{ selectedUser.username[0] | uppercase }}" size="large" shape="circle" /> 
+        {{ selectedUser?.username }}
+      </div>
+      <div class="flex items-center justify-center">
+        <p-button icon="pi pi-video" [rounded]="true" (onClick)="callWebRtc()" size="large" />
+      </div>
+    </div>
+    <div #messageContainer class="messages-container col-start-[1] col-end-[-1]">
+      @for (message of messageBubbles; track $index) {
+        <app-message-bubble [message]="message"></app-message-bubble>
+      }
+    </div>
+  } @else {
+     <div class="col-start-[1] col-end-[-1]">
+      <p class="flex justify-center items-center h-full text-2xl font-bold">Select a user to start chat</p>
+
+     </div>
+  }
+    <div class="textarea-container grid grid-cols-[1fr_100px] col-start-[1] col-end-[-1]">
+      <p class="p-5">
+        <ckeditor #editor [editor]="Editor" [config]="config" (change)="getMessage($event)"></ckeditor>
+      </p>
+      <p class="flex items-center justify-center">
+        <p-button icon="pi pi-send send-rotate" (onClick)="sendMessage()" [rounded]="true" size="large" [disabled]="!selectedUser?.id" />
+      </p>
+    </div>
+  </div>
+  <div class="videoWrapper flex flex-col" [class]="{'call' : isCalled, 'no-call' : !isCalled }">
+    <div class="flex justify-around items-center w-full h-full">
+      <video id="1" autoplay playsinline #localVideoContainer></video>
+      <video id="2" autoplay playsinline #remoteVideoContainer></video>
+    </div>
+    <div class="video-controls flex justify-center items-center gap-4 w-full">
+      <p-button icon="pi pi-phone" class="hang-up-button" (onClick)="hangUpCall()" [style]="{'background-color': 'red'}"></p-button>
+    </div>
+  </div>
+  <div class="getCalled wrapper flex justify-center items-center" [class]="{'show' : isCalling, 'hide' : !isCalling }">
+    @if(isCalling && !isPickingCall) {
+      <div class="getCalledContent flex flex-col justify-center items-center gap-4">
+        <p class="text-white text-2xl font-bold">Incoming Call...</p>
+        <div class="flex gap-4">
+          <p-button icon="pi pi-phone" class="accept-call-button" (onClick)="onPickCall(true)" [style]="{'background-color': 'green'}"></p-button>
+          <p-button icon="pi pi-phone" class="reject-call-button" (onClick)="rejectCall()" [style]="{'background-color': 'red'}"></p-button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
