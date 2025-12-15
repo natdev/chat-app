@@ -32,7 +32,18 @@ export class Chat implements  OnInit {
   private router =  inject(Router);
   private pc = new RTCPeerConnection({
   iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' }
+    { urls: 'stun:stun.l.google.com:19302' },
+    {
+    urls: "turn:TURN_HOST:3478",
+    username: "TURN_USER",
+    credential: "TURN_PASS",
+  },
+  // option TLS (souvent utile)
+  {
+    urls: "turns:TURN_HOST:5349",
+    username: "TURN_USER",
+    credential: "TURN_PASS",
+  },
   ]
 });
   public ringTones = new Howl({
