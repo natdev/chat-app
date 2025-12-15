@@ -41,7 +41,7 @@ export class Chat implements  OnInit {
     volume: 0.5
   });
   public mediaStreamConstraints = { video: true };
-  public localStream: any = {};
+  public localStream: MediaStream | null = null;
   public isCalling: boolean = false;
   public isCalled: boolean = false;
   public isPickingCall: boolean = false;
@@ -285,7 +285,7 @@ rejectCall(): void {
       }
       // console.log(this.localStream);
       
-      if (Object.keys(this.localStream).length === 0) {
+      if (!this.localStream) {
         const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
         this.localStream = stream;
         this.localVideoContainer.nativeElement.srcObject = stream;
