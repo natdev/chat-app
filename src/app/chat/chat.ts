@@ -330,7 +330,7 @@ rejectCall(): void {
       // console.log(this.localStream);
       
       if (!this.localStream) {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
         this.localStream = stream;
         this.localVideoContainer.nativeElement.srcObject = stream;
 
