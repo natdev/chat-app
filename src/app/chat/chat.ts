@@ -35,6 +35,7 @@ export class Chat implements  OnInit {
     { urls: 'stun:stun.l.google.com:19302' }
   ]
 });
+  private pendingCandidates: RTCIceCandidateInit[] = [];
   public ringTones = new Howl({
     src: ['/assets/pickup.mp3'],
     loop: true,
@@ -58,7 +59,7 @@ export class Chat implements  OnInit {
 
    constructor() {
     const loggedIn = window.localStorage.getItem('loggedIn') === 'true';
-      
+      this.createPeerConnection();
     if (loggedIn && this.socket.disconnected) {
       this.socket.auth = {isAuthenticated: loggedIn, userId: JSON.parse(window.localStorage.getItem('userData') || '{}').id, token: JSON.parse(window.localStorage.getItem('userData') || '{}').token };
       this.socket.connect();
@@ -73,10 +74,40 @@ export class Chat implements  OnInit {
     this.socket.on('webrtc_hang_up', () => {
       console.log('Remote hung up');
       this.deactivateVideoTracks();
-  
+      this.createPeerConnection();
     });
     this.socket.emit('get_users');
   }
+
+  private createPeerConnection() {
+  this.pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
+
+  this.pc.ontrack = (event) => {
+    const [remoteStream] = event.streams;
+    this.remoteVideoContainer.nativeElement.srcObject = remoteStream;
+  };
+
+  this.pc.onicecandidate = (event) => {
+    if (event.candidate && this.selectedUser?.socketId) {
+      this.socket.emit('webrtc_ice_candidate', {
+        candidate: event.candidate.toJSON(),
+        to: this.selectedUser.socketId
+      });
+    }
+  };
+
+  this.pendingCandidates = [];
+}
+
+
+  private async flushCandidates() {
+  if (!this.pc.remoteDescription) return;
+  for (const c of this.pendingCandidates) {
+    await this.pc.addIceCandidate(new RTCIceCandidate(c));
+  }
+  this.pendingCandidates = [];
+}
+
 
   public getEditor() {
 		return this.editorComponent?.editorInstance;
@@ -182,15 +213,28 @@ export class Chat implements  OnInit {
   
   this.receiveOffer();
   
-  this.socket.on('webrtc_answer', (answer: any) => {
-    this.pc.setRemoteDescription(new RTCSessionDescription(answer.sdp));
+  this.socket.on('webrtc_answer', async (answer: any) => {
+    await this.pc.setRemoteDescription(new RTCSessionDescription(answer.sdp));
+    await this.flushCandidates();
   });
 
   this.socket.on('webrtc_ice_candidate', async (data: any) => {
-    if (data.candidate) {
-      await this.pc.addIceCandidate(new RTCIceCandidate(data.candidate));
+    const candidate = data?.candidate;
+    if (!candidate) return;
+
+    // Si remoteDescription pas prête, on stocke
+    if (!this.pc.remoteDescription) {
+      this.pendingCandidates.push(candidate);
+      return;
+    }
+
+    try {
+      await this.pc.addIceCandidate(new RTCIceCandidate(candidate));
+    } catch (e) {
+      console.error('addIceCandidate error:', e, candidate);
     }
   });
+
 
   this.socket.on('webrtc_reject_call', () => {
     console.log('Appel rejeté par l’autre utilisateur.');
@@ -202,7 +246,7 @@ export class Chat implements  OnInit {
       this.pc.ontrack = (event) => {
         const [remoteStream] = event.streams;
       
-      this.socket.on('webrtc_pick_call', (data: any) => {
+      this.socket.once('webrtc_pick_call', (data: any) => {
         this.socket.off('webrtc_pick_call');
         if(data.pick){
           this.remoteVideoContainer.nativeElement.srcObject = remoteStream;
@@ -311,6 +355,7 @@ rejectCall(): void {
       console.log(remoteDesc);
       
       await this.pc.setRemoteDescription(remoteDesc);
+      await this.flushCandidates();
 
       const answerDesc = await this.pc.createAnswer();
       await this.pc.setLocalDescription(answerDesc);
